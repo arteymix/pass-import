@@ -397,7 +397,6 @@ def pass_export(conf, cls_export, data):
         with cls_export(conf['out'], settings=settings) as exporter:
             exporter.data = data
             exporter.clean(conf['clean'], conf['convert'])
-            report = exporter.audit(conf['pwned'])
             for entry in exporter.data:
                 pmpath = os.path.join(conf['droot'], entry.get(
                     'path', entry.get('title', '')))
@@ -419,7 +418,7 @@ def pass_export(conf, cls_export, data):
         conf.debug(traceback.format_exc())
         conf.die(error)
 
-    return paths_imported, paths_exported, report
+    return paths_imported, paths_exported
 
 
 def pass_filter(conf, entry):
@@ -452,7 +451,7 @@ def pass_filter(conf, entry):
         return False
 
 
-def report(conf, paths_imported, paths_exported, audit):
+def report(conf, paths_imported, paths_exported):
     """Print final success report."""
     if conf['dry_run']:
         conf.warning(f"Data would be imported from {conf['importer']} "
@@ -474,14 +473,6 @@ def report(conf, paths_imported, paths_exported, audit):
         conf.message("Imported data cleaned")
     if conf['all']:
         conf.message("All data imported")
-    for password, count in audit['breached']:
-        conf.warning(f"Password breached {count} time(s): {password}")
-    for password, details in audit['weak']:
-        conf.warning(f"Weak password detected: {password} might be weak."
-                     f" {zxcvbn_parse(details)}")
-    for entry in audit['duplicated']:
-        conf.warning(f"Duplicated passwords detected: "
-                     f"{', '.join([item['path'] for item in entry])}")
 
     for paths, header in [
         (paths_imported, "Passwords imported"),
@@ -509,10 +500,10 @@ def main():
 
     # Import & export
     data = pass_import(conf, cls_import)
-    paths_imported, paths_exported, audit = pass_export(conf, cls_export, data)
+    paths_imported, paths_exported = pass_export(conf, cls_export, data)
 
     # Success!
-    report(conf, paths_imported, paths_exported, audit)
+    report(conf, paths_imported, paths_exported)
 
 
 if __name__ == "__main__":
