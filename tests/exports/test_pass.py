@@ -184,7 +184,7 @@ class TestExportPassShow(TestPass):
                  'comments': ('This is a multiline note entry. Cube shank petr'
                               'oleum guacamole dart mower\nacutely slashing up'
                               'per cringing lunchbox tapioca wrongful unbeaten'
-                              ' sift.')}
+                              ' sift.\n')}
 
         self.assertEqual(self.store.show(path), entry)
 
